@@ -14,7 +14,7 @@ async def on_message(message):
     print(1)
     if message.content.startswith('clear'):
       print(2)
-      channel = client.get_channel(732680171143954482)
+      channel = client.get_channel(735913365188247597)
       history = await channel.history(limit=200).flatten()
       counter = 0
       for message in history:

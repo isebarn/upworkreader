@@ -1,7 +1,7 @@
 import requests
 
 def send_messages(ads):
-  url = "https://discord.com/api/webhooks/735524754521587733/L2MF9X-aekaQh6CrnJJCu4YAYt_Nisg1zmW_wAi22SnbiZPYpUwLefkMZTSxbtdFssNF" #webhook url, from here: https://i.imgur.com/aT3AThK.png
+  url = "https://discordapp.com/api/webhooks/735913557207548307/oYw_RP-TLMuSxaXPatcvQ0UTskgUbw4ana-jgUwX_Hdt0utu1qU8hjLEjjYIAwG9ZZcm"
 
   for message in ads:
     msg = '{}\n{}\n{}'.format(message['title'], message['payment'], message['url'])
