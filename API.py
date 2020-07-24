@@ -6,19 +6,13 @@ from Webhook import send_messages, send_html
 from ORM import Operations
 from random import randint
 from time import sleep
-from selenium.webdriver.firefox.options import Options
 from selenium.common.exceptions import NoSuchElementException
 
 
 app = Flask(__name__)
-'''
-driver = webdriver.Remote("http://192.168.1.35:4444/wd/hub", DesiredCapabilities.FIREFOX)
+
+driver = webdriver.Remote("http://127.0.0.1:4444/wd/hub", DesiredCapabilities.FIREFOX)
 driver.get('https://www.upwork.com/search/jobs/?q=scrap&sort=recency')
-'''
-options = Options()
-options.headless = False
-driver = webdriver.Firefox(options=options, executable_path='/usr/bin/geckodriver')
-driver.get('https://www.upwork.com/search/jobs/?page=2&q=scrap&sort=recency')
 
 def is_busted():
   soup = BeautifulSoup(driver.page_source, "lxml")
