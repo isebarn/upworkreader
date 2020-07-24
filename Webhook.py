@@ -1,22 +1,22 @@
 import requests
 
+url = "https://discordapp.com/api/webhooks/735913557207548307/oYw_RP-TLMuSxaXPatcvQ0UTskgUbw4ana-jgUwX_Hdt0utu1qU8hjLEjjYIAwG9ZZcm"
+
 def send_messages(ads):
-  url = "https://discordapp.com/api/webhooks/735913557207548307/oYw_RP-TLMuSxaXPatcvQ0UTskgUbw4ana-jgUwX_Hdt0utu1qU8hjLEjjYIAwG9ZZcm"
 
   for message in ads:
-    msg = '{}\n{}\n{}'.format(message['title'], message['payment'], message['url'])
+    msg = '{}\n{}'.format(message['title'], message['payment'])
     data = {}
     #for all params, see https://discordapp.com/developers/docs/resources/webhook#execute-webhook
     data["content"] = msg
-    data["username"] = "New Ad"
 
-    #leave this out if you dont want an embed
-    #data["embeds"] = []
-    #embed = {}
+    data["embeds"] = []
+    embed = {}
     #for all params, see https://discordapp.com/developers/docs/resources/channel#embed-object
-    #embed["description"] = "text in embed"
-    #embed["title"] = "embed title"
-    #data["embeds"].append(embed)
+    embed["description"] = message["body"]
+    embed["url"] = message['url']
+    embed["title"] = message["url"]
+    data["embeds"].append(embed)
 
     result = requests.post(url, json=data, headers={"Content-Type": "application/json"})
 
@@ -26,6 +26,30 @@ def send_messages(ads):
         print(err)
     else:
         print("Payload delivered successfully, code {}.".format(result.status_code))
+
+def send_html(html):
+
+    data = {}
+    #for all params, see https://discordapp.com/developers/docs/resources/webhook#execute-webhook
+    data["username"] = "New Ad"
+
+    #leave this out if you dont want an embed
+    data["embeds"] = []
+    embed = {}
+    #for all params, see https://discordapp.com/developers/docs/resources/channel#embed-object
+    embed["description"] = html
+    #embed["title"] = "embed title"
+    data["embeds"].append(embed)
+
+    result = requests.post(url, json=data, headers={"Content-Type": "application/json"})
+
+    try:
+        result.raise_for_status()
+    except requests.exceptions.HTTPError as err:
+        print(err)
+    else:
+        print("Payload delivered successfully, code {}.".format(result.status_code))
+
 
 
 if __name__ == "__main__":
