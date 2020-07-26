@@ -1,4 +1,5 @@
 import requests
+from time import sleep
 
 url = "https://discordapp.com/api/webhooks/735913557207548307/oYw_RP-TLMuSxaXPatcvQ0UTskgUbw4ana-jgUwX_Hdt0utu1qU8hjLEjjYIAwG9ZZcm"
 
@@ -20,12 +21,17 @@ def send_messages(ads):
 
     result = requests.post(url, json=data, headers={"Content-Type": "application/json"})
 
+    if int(result.headers['x-ratelimit-remaining']) == 0:
+        print("Ratelimit hit")
+        sleep(int(result.headers['x-ratelimit-remaining']) + 2)
+
     try:
         result.raise_for_status()
     except requests.exceptions.HTTPError as err:
         print(err)
     else:
         print("Payload delivered successfully, code {}.".format(result.status_code))
+
 
 def send_html(html):
 
@@ -54,7 +60,7 @@ def send_html(html):
 
 if __name__ == "__main__":
 
-  ads = [{'id': '01d33e2d5b0742ea28', 'title': 'Lead generation to find MSPs in USLead generation to find MSPs in US', 'url': 'https://www.upwork.com/job/Lead-generation-find-MSPs_~01d33e2d5b0742ea28/', 'payment': 'Fixed: $10'}]
+  ads = [{'id': '01d33e2d5b0742ea28', 'title': 'Lead generation to find MSPs in USLead generation to find MSPs in US', 'url': 'https://www.upwork.com/job/Lead-generation-find-MSPs_~01d33e2d5b0742ea28/', 'payment': 'Fixed: $10', 'body': 'Body'}]
 
-  send_messages(ads)
+  a = send_messages(ads)
 
