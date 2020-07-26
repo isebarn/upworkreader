@@ -31,9 +31,8 @@ def is_busted():
   return False
 
 # new and improved, does only use selenium, not bs4
-def new_parse():
+def new_parse(search_terms):
   listed_ads = []
-  search_terms = Operations.GetAllKeywords()
 
   for search_term in search_terms:
     driver.get(BASE_URL.format(search_term))
@@ -49,11 +48,11 @@ def new_parse():
           result["title"] = title.text
           result["url"] = url
           result["id"] = url.split('~')[-1].replace('/', '')
+
         except NoSuchElementException:
           print('Fail to load item from list')
 
         try:
-
           payments = ad.find_elements_by_tag_name("strong")
           payment = '-'.join([x.text for x in payments])
           result["payment"] = payment
@@ -126,69 +125,29 @@ def new_parse():
   else:
     return jsonify(new_ads)
 
-# to be deleted
-def parse():
-    driver.refresh()
-    soup = BeautifulSoup(driver.page_source, "lxml")
-
-    if is_busted():
-      return jsonify({ "busted": True })
-
-    ads = soup.find_all("a", class_="job-title-link break visited")
-
-    new_ads = []
-    parsed_ads = []
-
-    for ad in ads:
-
-      fixed = ad.findNext('strong', class_="js-budget")
-      if fixed is not None:
-        fixed = fixed.text.replace(' ', '').replace('\n', '')
-
-      payment_type = ad.findNext('strong').text.replace(' ', '').replace('\n', '')
-
-      if 'Hourly' in payment_type:
-        payment = payment_type
-
-      else:
-        payment = 'Fixed: {}'.format(fixed)
-
-      result = {}
-      result['id'] = ad['href'].split('~')[-1].replace('/', '')
-      result['title'] = ad.text.replace('\n', '')
-      result['url'] = 'https://www.upwork.com{}'.format(ad['href'])
-      result['payment'] = payment
-
-      parsed_ads.append(result)
-
-    if len(parsed_ads) is not 0:
-      old_ads = Operations.GetAllIds()
-
-      new_ads = [ad for ad in parsed_ads if ad['id'] not in old_ads]
-
-      if len(new_ads) is not 0:
-        [Operations.SaveAd(ad) for ad in new_ads]
-        send_messages(new_ads)
-
-    return jsonify(new_ads)
-
 @app.route('/busted')
 def busted():
   return jsonify({ "busted": is_busted() })
 
 @app.route('/testupdate')
 def testupdate():
-  return new_parse()
+  return new_parse(['scrap'])
 
 @app.route('/update')
 def update():
   sleep(randint(0,30))
-  return new_parse()
+  search_terms = Operations.GetAllKeywords()
+  return new_parse(search_terms)
 
 @app.route('/msg')
 def msg():
-
-  ads = [{'id': '01d33e2d5b0742ea28', 'title': 'Lead generation to find MSPs in USLead generation to find MSPs in US', 'url': 'https://www.upwork.com/job/Lead-generation-find-MSPs_~01d33e2d5b0742ea28/', 'payment': 'Fixed: $10'}]
+  ad = {}
+  ad['id'] = '01d33e2d5b0742ea28'
+  ad['title'] = 'Lead generation to find MSPs in USLead generation to find MSPs in US'
+  ad['url'] = 'https://www.upwork.com/job/Lead-generation-find-MSPs_~01d33e2d5b0742ea28/'
+  ad['payment'] = 'Fixed: $10'
+  ad['body'] = 'heh'
+  ads = [ad]
   send_messages(ads)
 
   return jsonify(ads)
