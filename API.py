@@ -13,7 +13,7 @@ import os
 app = Flask(__name__)
 
 BASE_URL = 'https://www.upwork.com/search/jobs/?q={}&sort=recency'
-driver = webdriver.Remote("http://127.0.0.1:4444/wd/hub", DesiredCapabilities.FIREFOX)
+driver = webdriver.Remote(os.environ.get('BROWSER'), DesiredCapabilities.FIREFOX)
 environment = os.environ.get('ENVIRONMENT')
 
 def is_busted():
@@ -157,4 +157,4 @@ def getAds():
   return jsonify([x.Readable() for x in Operations.GetAll()])
 
 if __name__ == "__main__":
-  print(new_parse())
+  print(os.environ.get('BROWSER'))
