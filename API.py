@@ -108,6 +108,12 @@ def new_parse(search_terms):
     error_data["errors"] = errors
     Operations.LogError(errors)
 
+  if len(logs) > 0:
+    log_data = {}
+    log_data["new_saved_ads"] = len(new_ads)
+    log_data["new_unique_ads"] = len(unique_listed_ads)
+    Operations.LogUpdate(log_data)
+
   return new_ads
 
 @app.route('/')

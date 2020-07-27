@@ -14,6 +14,17 @@ engine = create_engine(connectionString, echo=False)
 
 Base = declarative_base()
 
+class Updates(Base):
+  __tablename__ = 'updates'
+
+  Id = Column(Integer, primary_key=True)
+  Data = Column(Text)
+  Time = Column(DateTime)
+
+  def __init__(self, data):
+    self.Data = json.dumps(data)
+    self.Time = datetime.now()
+
 class Errors(Base):
   __tablename__ = 'errors'
 
@@ -60,6 +71,10 @@ class Ad(Base):
     return result
 
 class Operations:
+  def LogUpdate(data):
+    update = Updates(data)
+    session.add(update)
+    session.commit()
 
   def LogError(error_data):
     session.add(Errors(error_data))
