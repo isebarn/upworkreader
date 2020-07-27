@@ -14,6 +14,19 @@ engine = create_engine(connectionString, echo=False)
 
 Base = declarative_base()
 
+class Errors(Base):
+  __tablename__ = 'errors'
+
+  Id = Column(Integer, primary_key=True)
+  Text = Column(Text)
+  Time = Column(DateTime)
+  URL = Column(Integer)
+
+  def __init__(self, data):
+    self.Text = data["Text"]
+    self.Time = data["Time"]
+    self.URL = data["URL"]
+
 class Keywords(Base):
   __tablename__ = 'keywords'
   Id = Column('id', Integer, primary_key=True)
@@ -47,6 +60,10 @@ class Ad(Base):
     return result
 
 class Operations:
+
+  def LogError(error_data):
+    session.add(Errors(error_data))
+    session.commit()
 
   def GetAllKeywords():
     return [x.Value for x in session.query(Keywords).all()]

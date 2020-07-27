@@ -32,6 +32,8 @@ def is_busted():
 # new and improved, does only use selenium, not bs4
 def new_parse(search_terms):
   listed_ads = []
+  errors = []
+  logs = []
 
   for search_term in search_terms:
 
@@ -50,7 +52,7 @@ def new_parse(search_terms):
           result["id"] = url.split('~')[-1].replace('/', '')
 
         except NoSuchElementException:
-          print('Fail to load item from list', flush=True)
+          errors.append({ 'error': 'Fail to load item from list' })
 
         try:
           payments = ad.find_elements_by_tag_name("strong")
@@ -58,12 +60,12 @@ def new_parse(search_terms):
           result["payment"] = payment
 
         except NoSuchElementException:
-          print('Fail to load payment from item in list', flush=True)
+          errors.append({ 'error': 'Fail to load payment from item in list' })
 
         listed_ads.append(result)
 
     except NoSuchElementException:
-      print('Fail to load list', flush=True)
+      errors.append({ 'error': 'Fail to load list' })
 
 
   unique_ads = {x["id"]: x for x in listed_ads}
@@ -73,7 +75,6 @@ def new_parse(search_terms):
   old_ads = Operations.GetAllIds()
   new_ads = [ad for ad in unique_listed_ads if ad['id'] not in old_ads]
   new_ads = new_ads[0:3]
-  print(len(new_ads), flush = True)
 
   for ad in new_ads:
     driver.get(ad["url"])
@@ -90,10 +91,10 @@ def new_parse(search_terms):
         body = child_element.text
 
     except NoSuchElementException:
-      print("Fail to load body", flush=True)
+      error.append({ 'error': "Fail to load body" })
 
     except Exception as e:
-      print(e, flush=True)
+      error.append({ 'error': e })
 
     ad["body"] = body
 
@@ -101,6 +102,11 @@ def new_parse(search_terms):
   if len(new_ads) is not 0:
     [Operations.SaveAd(ad) for ad in new_ads]
     send_messages(new_ads)
+
+  if len(errors) > 0:
+    error_data = {}
+    error_data["errors"] = errors
+    Operations.LogError(errors)
 
   return new_ads
 
