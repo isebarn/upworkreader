@@ -6,7 +6,6 @@ from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.webdriver.support.ui import WebDriverWait
-from time import sleep
 from Webhook import send_messages, send_html
 import os
 
@@ -35,6 +34,7 @@ def new_parse(search_terms):
   listed_ads = []
 
   for search_term in search_terms:
+
     driver.get(BASE_URL.format(search_term))
     try:
       ads = driver.find_elements_by_xpath("//section[@class='air-card air-card-hover job-tile-responsive ng-scope']")
@@ -50,7 +50,7 @@ def new_parse(search_terms):
           result["id"] = url.split('~')[-1].replace('/', '')
 
         except NoSuchElementException:
-          print('Fail to load item from list')
+          print('Fail to load item from list', flush=True)
 
         try:
           payments = ad.find_elements_by_tag_name("strong")
@@ -58,20 +58,22 @@ def new_parse(search_terms):
           result["payment"] = payment
 
         except NoSuchElementException:
-          print('Fail to load payment from item in list')
+          print('Fail to load payment from item in list', flush=True)
 
         listed_ads.append(result)
 
     except NoSuchElementException:
-      print('Fail to load list')
+      print('Fail to load list', flush=True)
 
-    sleep(randint(2,5))
 
   unique_ads = {x["id"]: x for x in listed_ads}
   unique_listed_ads = list(unique_ads.values())
+  unique_listed_ads = unique_listed_ads
 
   old_ads = Operations.GetAllIds()
   new_ads = [ad for ad in unique_listed_ads if ad['id'] not in old_ads]
+  new_ads = new_ads[0:3]
+  print(len(new_ads), flush = True)
 
   for ad in new_ads:
     driver.get(ad["url"])
@@ -88,7 +90,10 @@ def new_parse(search_terms):
         body = child_element.text
 
     except NoSuchElementException:
-      print("Fail to load body")
+      print("Fail to load body", flush=True)
+
+    except Exception as e:
+      print(e, flush=True)
 
     ad["body"] = body
 
@@ -97,33 +102,11 @@ def new_parse(search_terms):
     [Operations.SaveAd(ad) for ad in new_ads]
     send_messages(new_ads)
 
+  return new_ads
 
-  # filter from results new ads
-  old_ads = Operations.GetAllIds()
-  new_ads = [ad for ad in listed_ads if ad['id'] not in old_ads]
-
-  for ad in new_ads:
-    driver.get(ad["url"])
-
-    try:
-      sections = driver.find_elements_by_xpath("//section[@class='up-card-section']")
-      body = sections[1].text
-      ad["body"] = body
-
-    except NoSuchElementException:
-      print("Fail to load body")
-
-    sleep(randint(1,5))
-
-  if len(new_ads) is not 0:
-    [Operations.SaveAd(ad) for ad in new_ads]
-    send_messages(new_ads)
-
-  if environment == 'development':
-    return new_ads
-
-  else:
-    return jsonify(new_ads)
+@app.route('/')
+def root():
+  return 'Hello'
 
 @app.route('/busted')
 def busted():
@@ -135,9 +118,8 @@ def testupdate():
 
 @app.route('/update')
 def update():
-  sleep(randint(0,30))
   search_terms = Operations.GetAllKeywords()
-  return new_parse(search_terms)
+  return jsonify(new_parse(search_terms))
 
 @app.route('/msg')
 def msg():
@@ -157,4 +139,5 @@ def getAds():
   return jsonify([x.Readable() for x in Operations.GetAll()])
 
 if __name__ == "__main__":
-  print(os.environ.get('BROWSER'))
+  search_terms = Operations.GetAllKeywords()
+  print(new_parse(search_terms))

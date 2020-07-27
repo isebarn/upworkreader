@@ -21,10 +21,11 @@ def send_messages(ads):
 
     result = requests.post(url, json=data, headers={"Content-Type": "application/json"})
 
+    '''
     if int(result.headers['x-ratelimit-remaining']) == 0:
         print("Ratelimit hit")
         sleep(int(result.headers['x-ratelimit-remaining']) + 2)
-
+    '''
     try:
         result.raise_for_status()
     except requests.exceptions.HTTPError as err:
